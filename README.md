@@ -23,10 +23,35 @@ Without a virtual display, this project can still mirror/stream a screen to the 
 - `desktop/second_monitor/autostart.py`: one-command automation for tablet detection, APK install, USB tunnel setup, and server startup.
 - `desktop/second_monitor/gui.py`: a small GUI intended to be packaged as the Windows EXE.
 - `android/`: a minimal Android app that opens the USB-forwarded stream and sends touches back to the laptop.
+- `run_second_monitor.py`: single-file bootstrapper that downloads requirements/tools and starts the automatic launcher.
 - `scripts/start-auto.sh`: starts the automatic desktop launcher from source.
 - `scripts/build-android-apk.sh`: builds `dist/SecondMonitorTablet.apk`.
 - `scripts/build-windows-exe.ps1`: builds `dist/SecondMonitorUSB.exe` on Windows.
 - `scripts/setup-x11-virtual-monitor.sh`: optional helper for X11 systems that expose a virtual output such as `VIRTUAL1`.
+
+## Single-file automatic runner
+
+If you only want one file to run from a source checkout, use:
+
+```bash
+python run_second_monitor.py
+```
+
+On Windows, the same command is:
+
+```bat
+python run_second_monitor.py
+```
+
+That single bootstrap file creates `.second-monitor-venv`, installs Python requirements, downloads Android platform-tools when `adb` is missing, tries to build/copy `dist/SecondMonitorTablet.apk` when Gradle is available, then starts the automatic launcher. The only things it cannot magically install for every machine are a trusted USB debugging authorization on the tablet and a real virtual display driver/output for the laptop OS.
+
+Useful options:
+
+```bash
+python run_second_monitor.py --reinstall
+python run_second_monitor.py --skip-apk-build
+python run_second_monitor.py --target-x 1920 --target-y 0 --target-width 1280 --target-height 720
+```
 
 ## Easiest source checkout flow
 
@@ -148,7 +173,15 @@ Without `xdotool`, `/touch` still accepts events and reports mapped coordinates,
 1. روی تبلت Developer Options و USB debugging را روشن کن.
 2. تبلت را با کابل USB وصل کن و پیام Allow USB debugging را قبول کن.
 3. اگر ویندوز می‌خواهی، `SecondMonitorUSB.exe`، فایل APK و فایل‌های `adb.exe` را در یک پوشه بگذار و EXE را اجرا کن.
-4. اگر از سورس اجرا می‌کنی، این دستور را از ریشه‌ی پروژه بزن:
+4. اگر از سورس اجرا می‌کنی و فقط یک فایل می‌خواهی، از ریشه‌ی پروژه این را بزن:
+
+   ```bash
+   python run_second_monitor.py
+   ```
+
+   این فایل خودش venv می‌سازد، dependencyهای Python را نصب می‌کند، اگر `adb` نباشد platform-tools را دانلود می‌کند، و launcher را اجرا می‌کند.
+
+   روش قبلی هم هنوز کار می‌کند:
 
    ```bash
    scripts/start-auto.sh

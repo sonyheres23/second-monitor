@@ -7,3 +7,6 @@ build/
 local.properties
 *.apk
 *.aab
+.second-monitor-venv/
+.second-monitor-tools/
+dist/
