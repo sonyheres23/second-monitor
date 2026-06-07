@@ -43,7 +43,7 @@ On Windows, the same command is:
 python run_second_monitor.py
 ```
 
-That single bootstrap file creates `.second-monitor-venv`, installs Python requirements, downloads Android platform-tools when `adb` is missing, tries to build/copy `dist/SecondMonitorTablet.apk` when Gradle is available, then starts the automatic launcher. The only things it cannot magically install for every machine are a trusted USB debugging authorization on the tablet and a real virtual display driver/output for the laptop OS.
+That single bootstrap file creates `.second-monitor-venv`, installs Python requirements, downloads Android platform-tools when `adb` is missing, downloads Gradle and Android SDK command-line tools when needed, builds/copies `dist/SecondMonitorTablet.apk`, installs it on the connected tablet, then starts the automatic launcher. The only things it cannot magically install for every machine are Java/JDK if Gradle cannot run, a trusted USB debugging authorization on the tablet, and a real virtual display driver/output for the laptop OS.
 
 Useful options:
 
@@ -179,7 +179,7 @@ Without `xdotool`, `/touch` still accepts events and reports mapped coordinates,
    python run_second_monitor.py
    ```
 
-   این فایل خودش venv می‌سازد، dependencyهای Python را نصب می‌کند، اگر `adb` نباشد platform-tools را دانلود می‌کند، و launcher را اجرا می‌کند.
+   این فایل خودش venv می‌سازد، dependencyهای Python را نصب می‌کند، اگر `adb` نباشد platform-tools را دانلود می‌کند، اگر APK آماده نباشد Gradle و Android SDK tools را دانلود می‌کند، APK تبلت را می‌سازد/نصب می‌کند، و launcher را اجرا می‌کند.
 
    روش قبلی هم هنوز کار می‌کند:
 

@@ -51,3 +51,27 @@ def test_install_python_requirements_installs_runtime_deps_without_editable_inst
     assert [str(tmp_path / "python"), "-m", "pip", "install", "mss>=9.0.1", "pillow>=10.0.0"] in commands
     assert all("-e" not in command for command in commands)
     assert (tmp_path / ".second-monitor-installed").read_text(encoding="utf-8") == "installed\n"
+
+
+def test_maybe_build_apk_downloads_tools_and_copies_output(tmp_path: Path, monkeypatch) -> None:
+    bootstrap = load_bootstrap()
+    output_apk = tmp_path / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk"
+    output_apk.parent.mkdir(parents=True)
+    commands: list[list[str]] = []
+
+    monkeypatch.setattr(bootstrap, "ROOT", tmp_path)
+    monkeypatch.setattr(bootstrap, "DIST_DIR", tmp_path / "dist")
+    monkeypatch.setattr(bootstrap, "ensure_gradle", lambda: tmp_path / "gradle" / "bin" / "gradle")
+    monkeypatch.setattr(bootstrap, "ensure_android_sdk", lambda env: tmp_path / "android-sdk")
+
+    def fake_run(command, **kwargs):
+        commands.append(command)
+        output_apk.write_bytes(b"apk")
+
+    monkeypatch.setattr(bootstrap, "run", fake_run)
+
+    apk = bootstrap.maybe_build_apk({})
+
+    assert apk == tmp_path / "dist" / bootstrap.APK_NAME
+    assert apk.read_bytes() == b"apk"
+    assert commands == [[str(tmp_path / "gradle" / "bin" / "gradle"), ":app:assembleDebug"]]

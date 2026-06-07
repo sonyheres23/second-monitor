@@ -22,3 +22,13 @@ def test_install_apk_skips_when_no_apk(monkeypatch) -> None:
 
     assert installed is None
     assert "Tablet APK was not found" in messages[-1]
+
+
+def test_launch_tablet_app_uses_explicit_activity(monkeypatch) -> None:
+    from second_monitor.autostart import launch_tablet_app
+
+    commands: list[list[str]] = []
+    monkeypatch.setattr("second_monitor.autostart.run_adb", lambda args: commands.append(args))
+
+    assert launch_tablet_app(log=lambda message: None) is True
+    assert commands == [["shell", "am", "start", "-n", "com.example.secondmonitor/.MainActivity"]]

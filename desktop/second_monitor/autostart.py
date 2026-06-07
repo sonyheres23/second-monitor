@@ -97,7 +97,7 @@ def launch_tablet_app(log: LogCallback = print) -> bool:
     """Try to open the tablet client after install and USB reverse setup."""
 
     try:
-        run_adb(["shell", "monkey", "-p", "com.example.secondmonitor", "1"])
+        run_adb(["shell", "am", "start", "-n", "com.example.secondmonitor/.MainActivity"])
     except AdbError as exc:
         log(f"Could not auto-open the tablet app: {exc}")
         return False
