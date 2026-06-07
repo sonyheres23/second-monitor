@@ -37,3 +37,17 @@ def test_env_with_tools_prepends_adb_and_sets_pythonpath(tmp_path: Path, monkeyp
 
     assert env["PATH"].startswith(str(tmp_path / "platform-tools"))
     assert env["PYTHONPATH"] == str(tmp_path / "desktop")
+
+
+def test_install_python_requirements_installs_runtime_deps_without_editable_install(tmp_path: Path, monkeypatch) -> None:
+    bootstrap = load_bootstrap()
+    commands: list[list[str]] = []
+    monkeypatch.setattr(bootstrap, "VENV_DIR", tmp_path)
+    monkeypatch.setattr(bootstrap, "run", lambda command, **kwargs: commands.append(command))
+
+    bootstrap.install_python_requirements(tmp_path / "python")
+
+    assert [str(tmp_path / "python"), "-m", "pip", "install", "--upgrade", "pip"] in commands
+    assert [str(tmp_path / "python"), "-m", "pip", "install", "mss>=9.0.1", "pillow>=10.0.0"] in commands
+    assert all("-e" not in command for command in commands)
+    assert (tmp_path / ".second-monitor-installed").read_text(encoding="utf-8") == "installed\n"

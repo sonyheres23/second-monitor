@@ -60,7 +60,7 @@ def install_python_requirements(python: Path) -> None:
         log("Python requirements already installed. Use --reinstall to force reinstall.")
         return
     run([str(python), "-m", "pip", "install", "--upgrade", "pip"])
-    run([str(python), "-m", "pip", "install", "-e", ".[capture]"])
+    run([str(python), "-m", "pip", "install", "mss>=9.0.1", "pillow>=10.0.0"])
     marker.write_text("installed\n", encoding="utf-8")
 
 
