@@ -75,3 +75,33 @@ def test_maybe_build_apk_downloads_tools_and_copies_output(tmp_path: Path, monke
     assert apk == tmp_path / "dist" / bootstrap.APK_NAME
     assert apk.read_bytes() == b"apk"
     assert commands == [[str(tmp_path / "gradle" / "bin" / "gradle"), ":app:assembleDebug"]]
+
+
+def test_commandline_tools_urls_use_current_and_fallback_builds(monkeypatch) -> None:
+    bootstrap = load_bootstrap()
+    monkeypatch.setattr(bootstrap.platform, "system", lambda: "Windows")
+
+    urls = bootstrap.commandline_tools_urls()
+
+    assert urls[0] == "https://dl.google.com/android/repository/commandlinetools-win-14742923_latest.zip"
+    assert "https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip" in urls
+
+
+def test_download_with_fallback_tries_next_url(tmp_path: Path, monkeypatch) -> None:
+    bootstrap = load_bootstrap()
+    calls: list[str] = []
+    archive = tmp_path / "download.zip"
+
+    def fake_urlretrieve(url: str, destination: Path):
+        calls.append(url)
+        if url == "bad-url":
+            raise OSError("404")
+        destination.write_bytes(b"zip")
+
+    monkeypatch.setattr(bootstrap.urllib.request, "urlretrieve", fake_urlretrieve)
+
+    used = bootstrap.download_with_fallback(["bad-url", "good-url"], archive)
+
+    assert used == "good-url"
+    assert calls == ["bad-url", "good-url"]
+    assert archive.read_bytes() == b"zip"

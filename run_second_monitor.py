@@ -28,15 +28,16 @@ GRADLE_VERSION = "8.14.4"
 ANDROID_COMPILE_SDK = "35"
 ANDROID_BUILD_TOOLS = "35.0.0"
 ANDROID_SDK_DIR = TOOLS_DIR / "android-sdk"
+COMMANDLINE_TOOLS_BUILDS = ["14742923", "13114758", "11076708"]
 PLATFORM_TOOLS_URLS = {
     "Windows": "https://dl.google.com/android/repository/platform-tools-latest-windows.zip",
     "Darwin": "https://dl.google.com/android/repository/platform-tools-latest-darwin.zip",
     "Linux": "https://dl.google.com/android/repository/platform-tools-latest-linux.zip",
 }
-COMMANDLINE_TOOLS_URLS = {
-    "Windows": "https://dl.google.com/android/repository/commandlinetools-win-11076708_latest.zip",
-    "Darwin": "https://dl.google.com/android/repository/commandlinetools-mac-11076708_latest.zip",
-    "Linux": "https://dl.google.com/android/repository/commandlinetools-linux-11076708_latest.zip",
+COMMANDLINE_TOOLS_PREFIXES = {
+    "Windows": "win",
+    "Darwin": "mac",
+    "Linux": "linux",
 }
 GRADLE_URL = f"https://services.gradle.org/distributions/gradle-{GRADLE_VERSION}-bin.zip"
 
@@ -173,16 +174,33 @@ def sdkmanager_executable(sdk_dir: Path) -> Path:
     return sdk_dir / "cmdline-tools" / "latest" / "bin" / executable
 
 
+def commandline_tools_urls() -> list[str]:
+    system = platform.system()
+    prefix = COMMANDLINE_TOOLS_PREFIXES.get(system)
+    if prefix is None:
+        raise RuntimeError(f"Automatic Android command-line tools download is not configured for {system}.")
+    return [f"https://dl.google.com/android/repository/commandlinetools-{prefix}-{build}_latest.zip" for build in COMMANDLINE_TOOLS_BUILDS]
+
+
+def download_with_fallback(urls: list[str], archive: Path) -> str:
+    last_error: Exception | None = None
+    for url in urls:
+        try:
+            log(f"Downloading {url}")
+            urllib.request.urlretrieve(url, archive)
+            return url
+        except Exception as exc:  # noqa: BLE001 - downloads can fail for HTTP, proxy, DNS, or TLS reasons.
+            last_error = exc
+            archive.unlink(missing_ok=True)
+            log(f"Download failed for {url}: {exc}")
+    raise RuntimeError(f"All download URLs failed. Last error: {last_error}")
+
+
 def download_commandline_tools(sdk_dir: Path = ANDROID_SDK_DIR) -> Path:
     sdkmanager = sdkmanager_executable(sdk_dir)
     if sdkmanager.exists():
         log(f"Using Android command-line tools at {sdkmanager.parent}")
         return sdkmanager
-
-    system = platform.system()
-    url = COMMANDLINE_TOOLS_URLS.get(system)
-    if url is None:
-        raise RuntimeError(f"Automatic Android command-line tools download is not configured for {system}.")
 
     archive = TOOLS_DIR / "android-commandline-tools.zip"
     extract_dir = TOOLS_DIR / "android-commandline-tools-raw"
@@ -193,9 +211,8 @@ def download_commandline_tools(sdk_dir: Path = ANDROID_SDK_DIR) -> Path:
     if latest_dir.exists():
         shutil.rmtree(latest_dir)
 
-    log(f"Downloading Android command-line tools from {url}")
-    urllib.request.urlretrieve(url, archive)
-    log("Extracting Android command-line tools")
+    used_url = download_with_fallback(commandline_tools_urls(), archive)
+    log(f"Extracting Android command-line tools from {used_url}")
     with zipfile.ZipFile(archive) as zip_file:
         zip_file.extractall(extract_dir)
     archive.unlink(missing_ok=True)
