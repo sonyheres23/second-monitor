@@ -1,0 +1,12 @@
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.gradle/
+build/
+local.properties
+*.apk
+*.aab
+.second-monitor-venv/
+.second-monitor-tools/
+dist/

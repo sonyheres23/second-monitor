@@ -1,0 +1,18 @@
+[project]
+name = "second-monitor"
+version = "0.1.0"
+description = "USB/ADB based tablet second monitor prototype"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+capture = ["mss>=9.0.1", "pillow>=10.0.0"]
+packaging = ["pyinstaller>=6.0.0"]
+
+[tool.setuptools.packages.find]
+where = ["desktop"]
+include = ["second_monitor*"]
+
+[tool.pytest.ini_options]
+pythonpath = ["desktop"]
+testpaths = ["desktop/tests"]
