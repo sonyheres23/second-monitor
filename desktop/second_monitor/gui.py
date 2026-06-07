@@ -1,11 +1,17 @@
 from __future__ import annotations
 
 import queue
+import sys
 import threading
 import tkinter as tk
+from pathlib import Path
 from tkinter import ttk
 
-from .autostart import AutoStartConfig, run_auto
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from second_monitor.autostart import AutoStartConfig, run_auto
+else:
+    from .autostart import AutoStartConfig, run_auto
 
 
 class LauncherApp(tk.Tk):

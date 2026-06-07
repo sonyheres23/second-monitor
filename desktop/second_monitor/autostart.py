@@ -8,9 +8,15 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import Callable
 
-from .adb import AdbError, connected_devices, reverse_port, run_adb
-from .geometry import Rect
-from .server import MonitorServer, MonitorState
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from second_monitor.adb import AdbError, connected_devices, reverse_port, run_adb
+    from second_monitor.geometry import Rect
+    from second_monitor.server import MonitorServer, MonitorState
+else:
+    from .adb import AdbError, connected_devices, reverse_port, run_adb
+    from .geometry import Rect
+    from .server import MonitorServer, MonitorState
 
 LogCallback = Callable[[str], None]
 
@@ -32,7 +38,10 @@ class AutoStartConfig:
 def default_apk_candidates() -> list[Path]:
     """Return likely APK locations for source checkouts and frozen EXE bundles."""
 
+    source_root = Path(__file__).resolve().parents[2]
     candidates = [
+        source_root / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk",
+        source_root / "dist" / "SecondMonitorTablet.apk",
         Path.cwd() / "android" / "app" / "build" / "outputs" / "apk" / "debug" / "app-debug.apk",
         Path.cwd() / "SecondMonitorTablet.apk",
         Path(sys.executable).resolve().parent / "SecondMonitorTablet.apk",

@@ -60,6 +60,18 @@ Without a virtual display, this project can still mirror/stream a screen to the 
    scripts/start-auto.sh
    ```
 
+   On Windows from Command Prompt, use:
+
+   ```bat
+   scripts\start-auto.bat
+   ```
+
+   If you are already inside `desktop\second_monitor`, direct execution now also works:
+
+   ```bat
+   python autostart.py
+   ```
+
 The automatic launcher waits for one authorized tablet, installs `dist/SecondMonitorTablet.apk` when present, configures `adb reverse`, tries to open the tablet app, and starts the stream server.
 
 ## One-click Windows EXE build
@@ -136,10 +148,22 @@ Without `xdotool`, `/touch` still accepts events and reports mapped coordinates,
 1. روی تبلت Developer Options و USB debugging را روشن کن.
 2. تبلت را با کابل USB وصل کن و پیام Allow USB debugging را قبول کن.
 3. اگر ویندوز می‌خواهی، `SecondMonitorUSB.exe`، فایل APK و فایل‌های `adb.exe` را در یک پوشه بگذار و EXE را اجرا کن.
-4. اگر از سورس اجرا می‌کنی، این دستور را بزن:
+4. اگر از سورس اجرا می‌کنی، این دستور را از ریشه‌ی پروژه بزن:
 
    ```bash
    scripts/start-auto.sh
+   ```
+
+   در ویندوز می‌توانی این را هم بزنی:
+
+   ```bat
+   scripts\start-auto.bat
+   ```
+
+   اگر داخل پوشه‌ی `desktop\second_monitor` هستی، این دستور هم کار می‌کند:
+
+   ```bat
+   python autostart.py
    ```
 
 5. اگر می‌خواهی سیستم‌عامل واقعاً تبلت را به عنوان مانیتور دوم بشناسد، باید قبلش virtual display driver نصب/فعال باشد؛ اپ فقط USB، نصب APK، استریم و تاچ را اتومات می‌کند.

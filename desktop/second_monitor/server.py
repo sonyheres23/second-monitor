@@ -2,14 +2,23 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 import time
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
+from pathlib import Path
 
-from .adb import AdbError, reverse_port
-from .capture import FrameGrabber
-from .geometry import CoordinateMapper, Rect, TouchPoint
-from .input_linux import InputInjector
+if __package__ in {None, ""}:
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+    from second_monitor.adb import AdbError, reverse_port
+    from second_monitor.capture import FrameGrabber
+    from second_monitor.geometry import CoordinateMapper, Rect, TouchPoint
+    from second_monitor.input_linux import InputInjector
+else:
+    from .adb import AdbError, reverse_port
+    from .capture import FrameGrabber
+    from .geometry import CoordinateMapper, Rect, TouchPoint
+    from .input_linux import InputInjector
 
 
 class MonitorState:
